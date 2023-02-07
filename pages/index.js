@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import Modal from "react-modal";
+
+Modal.setAppElement("#main");
 
 function HomePage({ data }) {
   const [beersList, setBeers] = useState(data);
@@ -6,6 +9,18 @@ function HomePage({ data }) {
   const [numItem, setNumItem] = useState(25);
   const [modal, showModal] = useState(false);
   const [beerInfo, setBeerInfo] = useState({});
+
+  const customStyles = {
+    content: {
+      top: "50%",
+      left: "50%",
+      maxWidth: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+    },
+  };
 
   useEffect(() => {
     fetch(
@@ -44,16 +59,13 @@ function HomePage({ data }) {
         <div className="inline-flex">
           {page != 1 && (
             <button
+              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
               onClick={(e) => handleClick(e, true)}
             >
               Pagina precedente
             </button>
           )}
-          <button
-            onClick={handleClick}
-          >
-            Pagina successiva
-          </button>
+          <button onClick={handleClick}>Pagina successiva</button>
         </div>
       </div>
       <br></br>
@@ -78,6 +90,51 @@ function HomePage({ data }) {
             </div>
           ))}
       </div>
+      <Modal
+        isOpen={modal}
+        onRequestClose={() => showModal(false)}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {beerInfo.name}
+          </h3>
+          <button
+            type="button"
+            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="defaultModal"
+            onClick={() => showModal(false)}
+          >
+            <svg
+              aria-hidden="true"
+              className="w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              ></path>
+            </svg>
+            <span className="sr-only">Close modal</span>
+          </button>
+        </div>
+        <br/>
+        <div className="flex">
+          <div className="flex-1">
+            <img
+              src={beerInfo.image_url}
+              className="object-contain h-48 w-96"
+            />
+          </div>
+          <div className="flex-1">
+            <p>{beerInfo.description}</p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
