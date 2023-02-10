@@ -7,7 +7,6 @@ function prepareString(str) {
   return str.replace(" ", "_");
 }
 
-
 function HomePage({ data }) {
   const [beersList, setBeers] = useState(data);
   const [page, setPage] = useState(1);
@@ -71,10 +70,10 @@ function HomePage({ data }) {
         <div className="inline-flex flex-2">
           <button
             className={
-              "bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow mr-1 disabled:opacity-" +
-              (page === 1 && "25")
+              "bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow mr-1"
             }
             onClick={(e) => handleClick(e, true)}
+            style={{ opacity: page === 1 ? "0.25" : null }}
             disabled={page === 1}
           >
             Pagina precedente
