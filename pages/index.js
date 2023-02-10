@@ -4,15 +4,9 @@ import Modal from "react-modal";
 Modal.setAppElement("#main");
 
 function prepareString(str) {
-  str.replace(" ", "_");
+  return str.replace(" ", "_");
 }
 
-function removeItemFromArray(array, item) {
-  const index = array.indexOf(item);
-  if (index > -1) {
-    array.splice(index, 1);
-  }
-}
 
 function HomePage({ data }) {
   const [beersList, setBeers] = useState(data);
@@ -21,6 +15,7 @@ function HomePage({ data }) {
   const [modal, showModal] = useState(false);
   const [beerInfo, setBeerInfo] = useState({});
   const [maltFilter, setMaltFilter] = useState();
+  const [nameFilter, setNameFilter] = useState();
 
   const customStyles = {
     content: {
@@ -35,16 +30,24 @@ function HomePage({ data }) {
   };
 
   useEffect(() => {
-    let maltfilter = maltFilter ? "&malt=" + maltFilter : "";
+    let maltfilter =
+        !maltFilter || maltFilter === "Tutte" ? "" : "&malt=" + maltFilter,
+      namefilter = nameFilter ? "&beer_name=" + prepareString(nameFilter) : "";
+
     fetch(
-      "https://api.punkapi.com/v2/beers?page=" + page + "&per_page=" + numItem + maltfilter
+      "https://api.punkapi.com/v2/beers?page=" +
+        page +
+        "&per_page=" +
+        numItem +
+        maltfilter +
+        namefilter
     )
       .then((res) => res.json())
       .then((data) => {
         setBeers(data);
       })
-      .catch(()=> alert("Errore"))
-  }, [page, numItem, maltFilter]);
+      .catch(() => alert("Errore"));
+  }, [page, numItem, maltFilter, nameFilter]);
 
   const handleClick = (event, prev) => {
     event.preventDefault();
@@ -58,17 +61,24 @@ function HomePage({ data }) {
 
   return (
     <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+      <img
+        src={"/images/logo.png"}
+        className="h-48"
+        style={{ margin: "auto" }}
+      />
       <div id="main"></div>
-      <div className="flex justify-between">
-        <div className="inline-flex">
-          {page != 1 && (
-            <button
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow mr-1"
-              onClick={(e) => handleClick(e, true)}
-            >
-              Pagina precedente
-            </button>
-          )}
+      <div className="flex">
+        <div className="inline-flex flex-2">
+          <button
+            className={
+              "bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow mr-1 disabled:opacity-" +
+              (page === 1 && "25")
+            }
+            onClick={(e) => handleClick(e, true)}
+            disabled={page === 1}
+          >
+            Pagina precedente
+          </button>
           <button
             className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
             onClick={handleClick}
@@ -76,9 +86,9 @@ function HomePage({ data }) {
             Pagina successiva
           </button>
         </div>
-        <div className="flex">
+        <div className="ml-1 flex">
           <select
-            className="select w-10 h-10 max-w-xs flex-1 border border-gray-400 rounded shadow"
+            className="select py-2 px-4 border border-gray-400 rounded shadow"
             value={numItem}
             onChange={(e) => {
               setNumItem(e.target.value);
@@ -102,6 +112,7 @@ function HomePage({ data }) {
               "Maris Otter Extra Pale",
               "Lager Malt",
               "Pale Ale",
+              "Tutte",
             ].map((malt, index) => (
               <div key={index}>
                 <input
@@ -115,21 +126,32 @@ function HomePage({ data }) {
               </div>
             ))}
           </div>
+          <p className="text-xl font-bold mt-2">Nome</p>
+          <form className="flex">
+            <input
+              className=" rounded-l p-2 flex-1 border border-gray-400 rounded shadow"
+              placeholder="Inserisci nome"
+              onChange={(e) => setNameFilter(e.target.value)}
+              value={nameFilter || ""}
+            />
+          </form>
         </div>
         <div className=" grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {beersList &&
             beersList.map((product) => (
               <div key={product.id} className="group">
                 <div
-                  className="bg-white-300 aspect-w-1 aspect-h-1 w-32 overflow-hidden rounded-lg  xl:aspect-w-7 xl:aspect-h-8"
+                  className="bg-white-300 aspect-w-1 aspect-h-1 overflow-hidden rounded-lg  xl:aspect-w-7 xl:aspect-h-8"
                   onClick={() => setModalInfo(product)}
                 >
                   <img
                     src={product.image_url}
-                    className="object-contain object-center h-48 w-96"
+                    className="object-contain object-center h-48"
                   />
                 </div>
-                <h3 className="mt-4 text-lg text-gray-700">{product.name}</h3>
+                <p className="text-center mt-4 text-lg text-gray-700">
+                  {product.name}
+                </p>
               </div>
             ))}
         </div>
