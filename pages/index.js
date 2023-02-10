@@ -101,8 +101,8 @@ function HomePage({ data }) {
         </div>
       </div>
       <br></br>
-      <div className="flex">
-        <div className="flex-initial w-90 mr-3">
+      <div className=" grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-1 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4">
+        <div className="mr-3">
           <p className="text-2xl font-bold">Filtri</p>
           <hr />
           <div className="mt-2">
@@ -127,7 +127,7 @@ function HomePage({ data }) {
             ))}
           </div>
           <p className="text-xl font-bold mt-2">Nome</p>
-          <form className="flex">
+          <form>
             <input
               className=" rounded-l p-2 flex-1 border border-gray-400 rounded shadow"
               placeholder="Inserisci nome"
@@ -136,7 +136,7 @@ function HomePage({ data }) {
             />
           </form>
         </div>
-        <div className=" grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+        <div className="col-span-3 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {beersList &&
             beersList.map((product) => (
               <div key={product.id} className="group">
