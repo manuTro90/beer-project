@@ -3,12 +3,24 @@ import Modal from "react-modal";
 
 Modal.setAppElement("#main");
 
+function prepareString(str) {
+  str.replace(" ", "_");
+}
+
+function removeItemFromArray(array, item) {
+  const index = array.indexOf(item);
+  if (index > -1) {
+    array.splice(index, 1);
+  }
+}
+
 function HomePage({ data }) {
   const [beersList, setBeers] = useState(data);
   const [page, setPage] = useState(1);
   const [numItem, setNumItem] = useState(25);
   const [modal, showModal] = useState(false);
   const [beerInfo, setBeerInfo] = useState({});
+  const [maltFilter, setMaltFilter] = useState();
 
   const customStyles = {
     content: {
@@ -23,14 +35,16 @@ function HomePage({ data }) {
   };
 
   useEffect(() => {
+    let maltfilter = maltFilter ? "&malt=" + maltFilter : "";
     fetch(
-      "https://api.punkapi.com/v2/beers?page=" + page + "&per_page=" + numItem
+      "https://api.punkapi.com/v2/beers?page=" + page + "&per_page=" + numItem + maltfilter
     )
       .then((res) => res.json())
       .then((data) => {
         setBeers(data);
-      });
-  }, [page, numItem]);
+      })
+      .catch(()=> alert("Errore"))
+  }, [page, numItem, maltFilter]);
 
   const handleClick = (event, prev) => {
     event.preventDefault();
@@ -45,50 +59,80 @@ function HomePage({ data }) {
   return (
     <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
       <div id="main"></div>
-      <div className="">
-        <select
-          value={numItem}
-          onChange={(e) => {
-            setNumItem(e.target.value);
-          }}
-        >
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
+      <div className="flex justify-between">
         <div className="inline-flex">
           {page != 1 && (
             <button
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow mr-1"
               onClick={(e) => handleClick(e, true)}
             >
               Pagina precedente
             </button>
           )}
-          <button onClick={handleClick}>Pagina successiva</button>
+          <button
+            className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+            onClick={handleClick}
+          >
+            Pagina successiva
+          </button>
+        </div>
+        <div className="flex">
+          <select
+            className="select w-10 h-10 max-w-xs flex-1 border border-gray-400 rounded shadow"
+            value={numItem}
+            onChange={(e) => {
+              setNumItem(e.target.value);
+            }}
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
         </div>
       </div>
       <br></br>
-      <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-        {beersList &&
-          beersList.map((product) => (
-            <div
-              key={product.id}
-              className="group"
-              onClick={() => setModalInfo(product)}
-            >
-              <div className="aspect-w-1 aspect-h-1 w-32 overflow-hidden rounded-lg  xl:aspect-w-7 xl:aspect-h-8">
-                <img
-                  src={product.image_url}
-                  className="object-contain h-48 w-96"
-                />
+      <div className="flex">
+        <div className="flex-initial w-90 mr-3">
+          <p className="text-2xl font-bold">Filtri</p>
+          <hr />
+          <div className="mt-2">
+            <p className="text-xl font-bold">Malto</p>
+            {[
+              "Extra Pale",
+              "Maris Otter Extra Pale",
+              "Lager Malt",
+              "Pale Ale",
+            ].map((malt, index) => (
+              <div key={index}>
+                <input
+                  checked={malt === maltFilter}
+                  type={"radio"}
+                  onChange={() => {
+                    setMaltFilter(malt);
+                  }}
+                />{" "}
+                {malt}
               </div>
-              <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
-              {/* <p className="mt-1 text-lg font-medium text-gray-900">
-                  {product.price}
-                </p> */}
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+        <div className=" grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+          {beersList &&
+            beersList.map((product) => (
+              <div key={product.id} className="group">
+                <div
+                  className="bg-white-300 aspect-w-1 aspect-h-1 w-32 overflow-hidden rounded-lg  xl:aspect-w-7 xl:aspect-h-8"
+                  onClick={() => setModalInfo(product)}
+                >
+                  <img
+                    src={product.image_url}
+                    className="object-contain object-center h-48 w-96"
+                  />
+                </div>
+                <h3 className="mt-4 text-lg text-gray-700">{product.name}</h3>
+              </div>
+            ))}
+        </div>
       </div>
       <Modal
         isOpen={modal}
@@ -122,7 +166,7 @@ function HomePage({ data }) {
             <span className="sr-only">Close modal</span>
           </button>
         </div>
-        <br/>
+        <br />
         <div className="flex">
           <div className="flex-1">
             <img
